@@ -42,18 +42,26 @@ if (empty($day)) {
 init($restaurants, $restaurant, $days, $day);
 
 function init($restaurants, $restaurant, $days, $day) {
+    $percent_arr = [];
+    $max_key = null;
+    $rest = null;
     foreach ($restaurants as $r) {
         similar_text($r->name, $restaurant, $percent);
         if ($percent > 65) {
-            $key = array_search($day, $days);
-            if (!$key && $key !== 0) {
-                response(['message' => 'This is not one of our days.'], 404);
-            }
-            scrapePlace($r, $day);
-            break;
+            $percent_arr[$percent] = $r;
         }
     }
-    response(['message' => 'This is not one of our restaurants.'], 404);
+    if (count($percent_arr) >= 1) {
+        $max_key = max(array_keys($percent_arr));
+        $rest = $percent_arr[$max_key];
+        $key = array_search($day, $days);
+        if (!$key && $key !== 0) {
+            response(['message' => 'This is not one of our days.'], 404);
+        }
+        scrapePlace($rest, $day);
+    } else {
+        response(['message' => 'This is not one of our restaurants.'], 404);
+    }
 }
 
 function scrapePlace($restaurant, $day) {
@@ -62,7 +70,7 @@ function scrapePlace($restaurant, $day) {
     if (!$content = $ws->scrapeOne($restaurant->url, $regex)) {
         response(['message' => 'No content found at ' . $restaurant->url], 404);
     }
-    $menu = $content[3];
+    $menu = $content[$restaurant->re_target_group_key];
     $menu = str_replace('<br>', '\n', $menu);
     $menu = str_replace('<br />', '\n', $menu);
     $menu = strip_tags($menu);
