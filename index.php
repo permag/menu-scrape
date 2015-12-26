@@ -2,9 +2,10 @@
 error_reporting(0);
 @ini_set('display_errors', 0);
 header('Content-type: application/json; charset=utf-8');
+require_once('./Data.php');
 require_once('./WebScrape.php');
 mb_internal_encoding('UTF-8');
-$restaurants = json_decode(file_get_contents('./data.json'));
+$restaurants = \Data::getRestaurants();
 
 if (isset($_GET['restaurants'])) {
     response(['available restaurants' => array_map(function ($restaurant) {
