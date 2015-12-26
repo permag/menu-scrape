@@ -4,13 +4,7 @@ error_reporting(0);
 header('Content-type: application/json; charset=utf-8');
 require_once('./WebScrape.php');
 mb_internal_encoding('UTF-8');
-
-$restaurants = [
-    ["Lunchmästar'n", 'http://lunchmstarn.kvartersmenyn.se/'],
-    ["Gaffelgott", 'http://gaffelgott.kvartersmenyn.se/'],
-    ["Fashion Lunch", 'http://fashionlunch.kvartersmenyn.se/'],
-    ["Tegel", 'http://tegel.kvartersmenyn.se/'],
-];
+$restaurants = json_decode(file_get_contents('./data.json'));
 
 if (isset($_GET['restaurants'])) {
     response(['available restaurants' => array_map(function ($restaurant) {
@@ -48,26 +42,24 @@ init($restaurants, $restaurant, $days, $day);
 
 function init($restaurants, $restaurant, $days, $day) {
     foreach ($restaurants as $r) {
-        similar_text($r[0], $restaurant, $percent);
+        similar_text($r->name, $restaurant, $percent);
         if ($percent > 65) {
             $key = array_search($day, $days);
             if (!$key && $key !== 0) {
                 response(['message' => 'This is not one of our days.'], 404);
             }
-            scrapePlace($r[0], $r[1], $day);
+            scrapePlace($r, $day);
             break;
         }
     }
     response(['message' => 'This is not one of our restaurants.'], 404);
 }
 
-function scrapePlace($restaurant, $url, $day) {
+function scrapePlace($restaurant, $day) {
     $ws = new WebScrape();
-    $day_upper = mb_strtoupper($day);
-    if (!$content = $ws->scrapeOne(
-        $url, "/<(strong|b)>($day|$day_upper)(.*?)<(strong|b|\/div)>/i"
-    )) {
-        response(['message' => 'No content found at ' . $url], 404);
+    $regex = str_replace('{day}', $day, $restaurant->re);
+    if (!$content = $ws->scrapeOne($restaurant->url, $regex)) {
+        response(['message' => 'No content found at ' . $restaurant->url], 404);
     }
     $menu = $content[3];
     $menu = str_replace('<br>', '\n', $menu);
@@ -75,8 +67,8 @@ function scrapePlace($restaurant, $url, $day) {
     $menu = strip_tags($menu);
     $menu = trim($menu, ' ,\n');
     return response([
-        'restaurant' => $restaurant,
-        'url' => $url,
+        'restaurant' => $restaurant->name,
+        'url' => $restaurant->url,
         'day' => $day,
         'menu' => $menu,
     ]);
