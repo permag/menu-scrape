@@ -39,6 +39,7 @@ if (empty($day)) {
     $day = $days[$key_current];
 }
 
+// Init script
 init($restaurants, $restaurant, $days, $day);
 
 function init($restaurants, $restaurant, $days, $day) {
