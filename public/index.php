@@ -71,7 +71,7 @@ function scrapePlace($restaurant, $day) {
     if (!$content = $ws->scrapeOne($restaurant->url, $regex)) {
         response(['message' => 'No content found at ' . $restaurant->url], 404);
     }
-    $menu = $content[$restaurant->re_target_group_key];
+    $menu = $content[$restaurant->re_target_group_index];
     $menu = str_replace('<br>', '\n', $menu);
     $menu = str_replace('<br />', '\n', $menu);
     $menu = strip_tags($menu);
