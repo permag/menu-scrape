@@ -9,7 +9,7 @@ $restaurants = \Data::getRestaurants();
 
 if (isset($_GET['restaurants'])) {
     response(['available restaurants' => array_map(function ($restaurant) {
-        return $restaurant[0];
+        return $restaurant->name;
     }, $restaurants)], 200);
 }
 
