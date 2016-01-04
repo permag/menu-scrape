@@ -67,8 +67,8 @@ function init($restaurants, $restaurant, $days, $day) {
 
 function scrapePlace($restaurant, $day) {
     $ws = new WebScrape();
-    $day = $day .'|'. mb_strtoupper($day);
-    $regex = str_replace('{day}', $day, $restaurant->re);
+    $day_reg = $day .'|'. mb_strtoupper($day);
+    $regex = str_replace('{day}', $day_reg, $restaurant->re);
     if (!$content = $ws->scrapeOne($restaurant->url, $regex)) {
         response(['message' => 'No content found at ' . $restaurant->url], 404);
     }
